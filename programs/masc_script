@@ -1,0 +1,98 @@
+basepath$ = "/Users/jessicahuynh/Desktop/neutrality/masc_redos"
+filetype$ = ".wav"
+outDirectory$ = "/Users/jessicahuynh/Desktop/neutrality/masc_redo_txt/"
+outFile$ = "redos"
+num_Dirs = 0
+depth = 0
+
+call openDir 'basepath$'
+
+procedure openDir .dir$
+
+.listName$ = "dirList"
+.dir_'depth'$ = .dir$
+
+call listDir '.dir$'
+Create Strings as directory list... '.listName$' '.dir$'
+.numDirs_'depth' = Get number of strings
+
+for .dir_'depth' to .numDirs_'depth'
+.nextDir$ = Get string... .dir_'depth'
+
+if .nextDir$ <> "." and .nextDir$ <> ".."
+depth += 1
+
+call openDir '.dir$'/'.nextDir$'
+depth -= 1
+endif
+
+.dir$ = .dir_'depth'$
+select Strings '.listName$'
+endfor
+
+Remove
+endproc
+
+procedure listDir .dir$
+	Create Strings as file list... fileList '.dir$'/*'filetype$'
+	.numFiles = Get number of strings
+	if .numFiles > 0
+		fileappend 'outDirectory$''outFile$'.csv Filename,min_intensity,max_intensity,mean_intensity,min_pitch,max_pitch,mean_pitch,hnr,jitter,shimmer,
+	fileappend 'outDirectory$''outFile$'.csv 'newline$'
+
+	for i to .numFiles
+		filename$ = Get string: i
+		print "'.dir$'/'filename$'"'newline$'
+
+		Read from file: "'.dir$'/'filename$'"
+		mySound = selected("Sound")
+		Rename... sound
+
+		#open the file
+		select Sound sound
+		To Pitch... 0 75 400
+		min_pitch = Get minimum... 0 0 Hertz Parabolic
+		max_pitch = Get maximum... 0 0 Hertz Parabolic
+		mean_pitch = Get mean... 0 0 Hertz
+
+		select Pitch sound
+		Remove
+
+		select Sound sound
+		To Intensity... 100 0
+		min_intensity = Get minimum... 0 0 Parabolic
+		max_intensity = Get maximum... 0 0 Parabolic
+		mean_intensity = Get mean... 0 0
+
+		select Intensity sound
+		Remove
+
+		select Sound sound
+		To PointProcess (periodic, cc)... 75 400
+		jitter = Get jitter (local)... 0 0 0.0001 0.02 1.3
+
+		select Sound sound
+		plus PointProcess sound
+		shimmer = Get shimmer (local)... 0 0 0.0001 0.02 1.3 1.6
+			
+		select Sound sound
+		To Harmonicity (cc)... 0.01 75 0.1 1.0
+		hnr = Get mean... 0 0
+			
+
+		# export values to output file
+		fileappend 'outDirectory$''outFile$'.csv "'.dir$''filename$'", 'min_pitch', 'max_pitch', 'mean_pitch', 'min_intensity', 'max_intensity', 'mean_intensity', 'hnr', 'jitter', 'shimmer',
+		fileappend 'outDirectory$''outFile$'.csv 'newline$'
+
+		Remove
+
+		select Strings fileList
+		endfor
+
+		#print 'fName$' complete.'newline$'
+		#fileappend 'outDirectory$''outFile$'.csv 'newline$'
+	endif
+
+	select Strings fileList
+	Remove
+endproc
