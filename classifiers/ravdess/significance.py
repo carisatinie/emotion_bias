@@ -13,8 +13,15 @@ import pickle
 from scipy import stats
 import FisherExact
 
+'''
+RAVDESS: statistical tests to determine gender bias.
+chi-squared test for each emotion and feature set, comparing between male and female.
+Ex: MFCC angry female vs MFCC angry male
+'''
+
+# Run SVM on given file with given features
+# C and gamma are hyperparameters
 def svm(file_name, feature_idxs, C, gamma):
-  # print(feature_idxs)
   rows = np.genfromtxt(file_name, delimiter=',', skip_header=1)
   x = rows[:, feature_idxs]
   y = rows[:, -1]
@@ -23,7 +30,7 @@ def svm(file_name, feature_idxs, C, gamma):
   s = pickle.dumps(clf)
   return s
 
-# file_name is val or test
+# file_name is for validation or test sets
 def predict(file_name, feature_idxs, model):
   rows = np.genfromtxt(file_name, delimiter=',', skip_header=1)
 
@@ -35,10 +42,12 @@ def predict(file_name, feature_idxs, model):
   confusion_matrix = metrics.confusion_matrix(y_true, y_pred, labels=[1,2,3,4,5])
   return confusion_matrix
 
+# return model that was trained
 def get_model(train_file, feature_idxs, C, gamma):
   model = svm(train_file, feature_idxs, C, gamma)
   return model
 
+# Return indices of MFCC features from the dataset. All MFCC features will contain the string "mfcc"
 def get_mfcc_features(file_name):
   header = np.genfromtxt(file_name, delimiter=',', max_rows=1, dtype='<U64')
   rows = np.genfromtxt(file_name, delimiter=',', skip_header=1)
@@ -48,17 +57,21 @@ def get_mfcc_features(file_name):
       mfcc_idxs.append(col_idx)
   return mfcc_idxs
 
+# Return indices of acoustic features from the dataset. The acoustic features are known to be in the columns used here.
 def get_acoustic_features(file_name):
   header = np.genfromtxt(file_name, delimiter=',', max_rows=1, dtype='<U64')
   rows = np.genfromtxt(file_name, delimiter=',', skip_header=1)
   acoustic_idxs = range(-13, -4)
   return acoustic_idxs
 
+# Return indices of acoustic and MFCC features from the dataset. Makes sure that no duplicates are returned.
 def get_mfcc_acoustic_features(file_name):
   mfcc_idxs = get_mfcc_features(file_name)
   acoustic_idxs = get_acoustic_features(file_name)
   return list(set().union(mfcc_idxs, acoustic_idxs))
 
+# Returns indices of features obtained from using Random Forest feature selection.
+# Runs random forest and gathers the 10 most important features.
 def get_random_forest_features(file_name):
   header = np.genfromtxt(file_name, delimiter=',', max_rows=1, dtype='<U64')
   rows = np.genfromtxt(file_name, delimiter=',', skip_header=1)
@@ -73,18 +86,14 @@ def get_random_forest_features(file_name):
     rf_idxs.append(feature_list_index)
   return rf_idxs
 
-# runs chi squared on each emotion in the selected feature set
+# runs chi squared on each emotion in the selected feature set.
+# Writes results to a CSV.
 def chi_squared_per_emotion(male_confusion, female_confusion, writer, feature_type):
   emotions = ["neutral", "happy", "sad", "surprised", "angry"]
   for i in range(len(male_confusion)): # for each emotion
     male_counts = male_confusion[i]
     female_counts = female_confusion[i]
     cont_table = np.stack((male_counts, female_counts))
-    # print(cont_table)
-    # chisq, p, dof, exp = stats.chi2_contingency(cont_table)
-    # print("chisq ", chisq, "; p", p)
-
-    # print(FisherExact.fisher_exact(cont_table))
     writer.writerow([feature_type + "_m_" + emotions[i], male_counts, feature_type + "_f_" + emotions[i], female_counts, FisherExact.fisher_exact(cont_table)])
 
 def main(feature_type, writer):
@@ -112,6 +121,7 @@ def main(feature_type, writer):
   val_model_male = None
   val_model_both = None
 
+  # Retrieves appropriate feature indices. Trains model using testing and validation data.
   if feature_type == 'corr':
     with open(feature_female, 'r') as csvfile:
       reader = csv.reader(csvfile, delimiter='\n')
@@ -165,12 +175,9 @@ def main(feature_type, writer):
     val_model_male = get_model(train_male, feature_idxs_male, 20, 0.000001)
     val_model_both = get_model(train_both, feature_idxs_both, 20, 0.00001)
 
-  # predict test set
-  # print("--- TEST PREDICTIONS ---")
-  # confusion_female = predict(test_female, feature_idxs_female, val_model_female)
-  # confusion_male = predict(test_male, feature_idxs_male, val_model_male)
-  confusion_female = predict(test_female, feature_idxs_female, val_model_both)
-  confusion_male = predict(test_male, feature_idxs_male, val_model_both)
+  # Run tuned model on test data. Get confusion matrix for each gender, and run chi squared test.
+  confusion_female = predict(test_female, feature_idxs_female, val_model_female)
+  confusion_male = predict(test_male, feature_idxs_male, val_model_male)
 
   chi_squared_per_emotion(confusion_male, confusion_female, writer, feature_type)
 

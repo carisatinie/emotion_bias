@@ -14,12 +14,13 @@ from scipy import stats
 import FisherExact
 
 '''
-RAVDESS
-chi-squared test for  each pair of feature sets, same gender
+RAVDESS: statistical tests to determine feature set bias.
+chi-squared test for  each pair of feature sets, with the same gender
 '''
 rf_final = None
+# Run SVM on given file with given features
+# C and gamma are hyperparameters
 def svm(file_name, feature_idxs, C, gamma):
-  # print(feature_idxs)
   rows = np.genfromtxt(file_name, delimiter=',', skip_header=1)
   x = rows[:, feature_idxs]
   y = rows[:, -1]
@@ -28,7 +29,7 @@ def svm(file_name, feature_idxs, C, gamma):
   s = pickle.dumps(clf)
   return s
 
-# file_name is val or test
+# file_name is for validation or test sets
 def predict(file_name, feature_idxs, model):
   rows = np.genfromtxt(file_name, delimiter=',', skip_header=1)
 
@@ -40,10 +41,12 @@ def predict(file_name, feature_idxs, model):
   confusion_matrix = metrics.confusion_matrix(y_true, y_pred, labels=[1,2,3,4,5])
   return confusion_matrix
 
+# return model that was trained
 def get_model(train_file, feature_idxs, C, gamma):
   model = svm(train_file, feature_idxs, C, gamma)
   return model
 
+# Return indices of MFCC features from the dataset. All MFCC features will contain the string "mfcc"
 def get_mfcc_features(file_name):
   header = np.genfromtxt(file_name, delimiter=',', max_rows=1, dtype='<U64')
   rows = np.genfromtxt(file_name, delimiter=',', skip_header=1)
@@ -53,17 +56,22 @@ def get_mfcc_features(file_name):
       mfcc_idxs.append(col_idx)
   return mfcc_idxs
 
+# Return indices of acoustic features from the dataset. The acoustic features are known to be in the columns used here.
 def get_acoustic_features(file_name):
   header = np.genfromtxt(file_name, delimiter=',', max_rows=1, dtype='<U64')
   rows = np.genfromtxt(file_name, delimiter=',', skip_header=1)
   acoustic_idxs = range(-13, -4)
   return acoustic_idxs
 
+# Return indices of acoustic and MFCC features from the dataset. Makes sure that no duplicates are returned.
 def get_mfcc_acoustic_features(file_name):
   mfcc_idxs = get_mfcc_features(file_name)
   acoustic_idxs = get_acoustic_features(file_name)
   return list(set().union(mfcc_idxs, acoustic_idxs))
 
+# Returns indices of features obtained from using Random Forest feature selection.
+# Runs random forest and gathers the 10 most important features.
+# Optimized to only run when necessary to increase efficiency
 def get_random_forest_features(file_name):
   global rf_final
   if not rf_final:
@@ -84,6 +92,9 @@ def get_random_forest_features(file_name):
     print(rf_final)
     return rf_final
 
+# Given two arrays of consideration, creates a contigency table.
+# Runs the fisher exact test, a variation of chi squared test for smaller tables.
+# Writes results to a CSV.
 def chi_squared(confusion1, confusion2, gender, params1, params2):
   chi_squared_file = open("ravdess_chisquared_gender.csv", "a+")
   writer = csv.writer(chi_squared_file, delimiter=',')
@@ -93,11 +104,6 @@ def chi_squared(confusion1, confusion2, gender, params1, params2):
     counts1 = confusion1[i]
     counts2 = confusion2[i]
     cont_table = np.stack((counts1, counts2))
-    # print(cont_table)
-    # chisq, p, dof, exp = stats.chi2_contingency(cont_table)
-    # print("chisq ", chisq, "; p", p)
-
-    # print(FisherExact.fisher_exact(cont_table))
 
     if gender == "female":
       writer.writerow([params1 + "_f_" + emotions[i], counts1, params2 + "_f_" + emotions[i], counts2, FisherExact.fisher_exact(cont_table)])
@@ -105,6 +111,8 @@ def chi_squared(confusion1, confusion2, gender, params1, params2):
       writer.writerow([params1 + "_m_" + emotions[i], counts1, params2 + "_m_" + emotions[i], counts2, FisherExact.fisher_exact(cont_table)])
   chi_squared_file.close()
 
+# Finds every pair of feature sets within male and within female. 
+# Runs fisher exact test using the confusion matrices returned by SVM.
 def main(feature_type, writer):
   train_female = "../../final_data/ravdess/speech_train_data_numerized_female.csv"
   test_female = "../../final_data/ravdess/speech_test_data_numerized_female.csv"
@@ -124,6 +132,7 @@ def main(feature_type, writer):
 
   # FEMALE / FEMALE
   # [Tukey's, acoustic, mfcc, mfcc+acoustic, random forest]
+  # Tuned hyperparameters. Each tuple corresponds to one feature set in the order: Tukey's, acoustic, MFCC, MFCC+acoustic, random forest.
   parameters = [(15, 0.00001), (6, 0.001), (10, 0.000001), (20, 0.000001), (20, 0.000001)]
   params = ["corr", "a", "m", "m+a", "rf"]
 
@@ -169,14 +178,11 @@ def main(feature_type, writer):
       else: # random forest
         feature_idxs_2 = get_random_forest_features(train_female)
 
-      # validation
-      # val_model_1 = get_model(train_female, feature_idxs_1, C_1, gamma_1)
-      # val_model_2 = get_model(train_female, feature_idxs_2, C_2, gamma_2)
+      # Get trained models for each feature set
       val_model_1 = get_model(train_female, feature_idxs_1, C_1, gamma_1)
       val_model_2 = get_model(train_female, feature_idxs_2, C_2, gamma_2)
 
-      # predict test set
-      # print("--- TEST PREDICTIONS ---")
+      # Predict on the test data and obtain confusion matrices
       confusion_1 = predict(test_female, feature_idxs_1, val_model_1)
       confusion_2 = predict(test_female, feature_idxs_2, val_model_2)
 
@@ -184,6 +190,7 @@ def main(feature_type, writer):
 
   # MALE / MALE
   # [Tukey's, acoustic, mfcc, mfcc+acoustic, random forest]
+  # Same as above, except for males instead of females.
   parameters = [(10, 0.001), (10, 0.0001), (10, 0.000001), (20, 0.000001), (20, 0.000001)]
   global rf_final
   rf_final = None
@@ -242,7 +249,7 @@ def main(feature_type, writer):
       chi_squared(confusion_1, confusion_2, "male", params[i], params[j])
 
 if __name__ == "__main__":
-  parser = argparse.ArgumentParser(description='Run chi-squared with MASC.')
+  parser = argparse.ArgumentParser(description='Run chi-squared with RAVDESS.')
   parser.add_argument('--feature_type')
   parsed_args = parser.parse_args()
 
