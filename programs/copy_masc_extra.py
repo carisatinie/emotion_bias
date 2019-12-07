@@ -1,5 +1,8 @@
 import csv
 
+# we combine all our acoustic similarity calculation files together
+# we ran several iterations to get more information
+
 for i in range(1, 69):
     file_name = None
     if i < 10:

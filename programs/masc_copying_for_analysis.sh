@@ -1,5 +1,8 @@
 #!bin/bash/
 
+# folders need to be arranged in a certain way for Phonological Corpus Tools
+# this program does that
+
 adjectives=('anger' 'elation' 'neutral' 'panic' 'sadness')
 
 for i in {1..9}

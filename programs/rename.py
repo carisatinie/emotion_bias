@@ -1,5 +1,7 @@
 import csv
 
+# we rename the names of the files for the features
+
 with open('all_features_masc_1.csv') as csv_file:
     with open('all_features_masc.csv', "w") as csv_write:
         csv_reader = csv.reader(csv_file, delimiter=',')

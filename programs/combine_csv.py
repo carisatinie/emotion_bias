@@ -1,5 +1,7 @@
 import csv
 
+# we combine all our features together into one csv
+
 # is09 = open("../initial_data/IS09_ravdess.csv")
 # acoustic = open("../initial_data/all_features_ravdess.csv")
 # output = open("../initial_data/concat_all_features_ravdess.csv", "w")

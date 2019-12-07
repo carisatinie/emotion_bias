@@ -2,6 +2,8 @@ import csv
 import shutil
 import os
 
+# we copy wav files so we can redo the feature extraction on the failed ones
+
 # with open("masc_redos.csv", "r") as redos:
 #     csv_reader = csv.reader(redos, delimiter=",")
 #     line_count = 0

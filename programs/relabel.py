@@ -1,5 +1,7 @@
 import csv
 
+# we cut down our emotions into the 5 core emotions, so this relabels the wav files
+
 # a = open("../final_data/ravdess/speech_test_data_numerized_female.csv")
 # b = open("../final_data/ravdess/speech_test_data_numerized_male.csv")
 # c = open("../final_data/ravdess/speech_test_data_numerized.csv")

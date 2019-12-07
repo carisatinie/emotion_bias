@@ -1,6 +1,8 @@
 import csv
 import sys
 
+# we combine all our features together for IS09 and take out rows with --undefined--
+
 new_file = open("../initial_data/IS09_augmented_masc.csv")
 reader = csv.reader(new_file, delimiter=',')
 

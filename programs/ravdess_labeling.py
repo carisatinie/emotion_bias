@@ -1,5 +1,7 @@
 import csv
 
+# label ravdess data
+
 with open('../initial_data/concat_all_features_ravdess.csv') as csv_file:
     with open('../final_data/labeled_features_ravdess.csv', "w") as csv_writer_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
