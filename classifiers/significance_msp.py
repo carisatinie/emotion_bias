@@ -1,6 +1,12 @@
 import numpy as np
 from matplotlib import pyplot as plt
 
+'''
+MSP: Graphs for Gender bias
+Uses Tukey's features (highest performing feature set for MSP)
+Only uses emotions that have significant difference between male and female.
+'''
+
 # MSP -- Tukey
 # neutral, sad, anger
 

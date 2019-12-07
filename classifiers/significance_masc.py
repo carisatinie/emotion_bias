@@ -1,8 +1,11 @@
 import numpy as np
 from matplotlib import pyplot as plt
 
-# MASC -- Masc
-# neutral, happiness, sadness, surprise, anger
+'''
+MASC: Graphs for Gender bias
+Uses MFCC+acoustic features (highest performing feature set for MASC)
+Only uses emotions that have significant difference between male and female.
+'''
 
 # predicted as
 m_neutral = np.array([61.22194514, 11.55717762, 25.48015365, 10.59782609, 7.362784471])

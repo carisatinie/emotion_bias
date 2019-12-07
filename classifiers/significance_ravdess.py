@@ -1,12 +1,11 @@
 import numpy as np
 from matplotlib import pyplot as plt
 
-# RAVDESS -- MFCC
-# surprise
-
-# male 6.25	31.25	0	37.5	25
-
-# female 5.263157895	5.263157895	15.78947368	68.42105263	5.263157895
+'''
+RAVDESS: Graphs for Gender bias
+Uses MFCC features (highest performing feature set for RAVDESS)
+Only uses emotions that have significant difference between male and female.
+'''
 
 # predicted as
 m_neutral = np.array([6.25])
