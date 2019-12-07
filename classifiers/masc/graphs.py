@@ -1,7 +1,10 @@
 from matplotlib import pyplot as plt 
 import numpy as np
 
-''' RAVDESS Graphs '''
+''' MASC Graphs '''
+''' Graphs the F1 scores of each feature set as a bar chart. Outputs 3 graphs: one for male, female, and both genders. 
+Uses the results from running model on the test set after tuning on training and validation sets.
+'''
 objects = ('Tukey', 'Acoustic', 'MFCC', 'MFCC+Ac', 'RF')
 x_pos = np.arange(len(objects))
 

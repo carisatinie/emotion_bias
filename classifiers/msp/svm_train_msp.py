@@ -12,6 +12,11 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 import pickle
 from scipy import stats
 
+'''
+MSP: Train SVM using training, validation sets.
+Predict on test set and output F1 score and confusion matrix.
+'''
+
 # Run SVM on a given file (train, test, or val) and with certain feature indices that are found 
 # in main(), according to the feature set type passed in as a command line argument.
 def svm(file_name, feature_idxs):
