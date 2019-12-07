@@ -1,5 +1,9 @@
 import argparse
 
+''' 
+Given a file with both genders, creates 2 CSVs, one for male and one for female.
+Uses 'gender' column; '0'=female, '1'=male.
+'''
 def split_genders(file, dest_file, gender_idx):
   lines = open(file, 'r').readlines()
 
@@ -30,6 +34,7 @@ def split_genders(file, dest_file, gender_idx):
           file.write('\n')
 
 if __name__ == "__main__":
+  # Usage: python3 split_genders.py --data=[ravdess,msp,masc]
   parser = argparse.ArgumentParser(description='Split data into male and female CSVs.')
   parser.add_argument('--data', required=True)
   data = parser.parse_args().data
