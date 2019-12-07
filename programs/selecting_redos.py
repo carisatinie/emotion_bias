@@ -1,4 +1,5 @@
-# if anything in the row is 100000000.0, then we output the name of the file
+# if anything in the row is 100000000.0, then we output the name of the file, to know we have to redo
+# the acoustic analysis
 
 import csv
 import argparse

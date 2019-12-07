@@ -1,5 +1,7 @@
 import csv
 
+# numerize our emotions for SVM
+
 train_data = open("../final_data/ravdess/speech_train_data.csv")
 val_data = open("../final_data/ravdess/speech_val_data.csv")
 test_data = open("../final_data/ravdess/speech_test_data.csv")

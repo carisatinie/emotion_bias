@@ -1,5 +1,7 @@
 #!bin/bash/
 
+# calculating acoustic similarity with Phonological Corpus Tools
+
 for i in {1..9}
 do
     echo "speaker"$i

@@ -1,5 +1,7 @@
 #bin/bash
 
+# used to extract IS09 emotions
+
 echo 'name' >> column_msp.csv
 #for f in $(find ../speech_datasets/man_aff_spch -type f -name '*.wav'); 
 for f in $(find ../speech_datasets/msp_podcast/Audio -type f -name '*.wav');

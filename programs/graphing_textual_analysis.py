@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
 
+# graph plots used in textual emotion vs. spoken emotion section
+
 plt.figure()
 plt.ylim(0, 100)
 

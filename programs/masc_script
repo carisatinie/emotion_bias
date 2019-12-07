@@ -1,3 +1,5 @@
+# Praat script to extract acoustic features for MASC
+
 basepath$ = "/Users/jessicahuynh/Desktop/neutrality/masc_redos"
 filetype$ = ".wav"
 outDirectory$ = "/Users/jessicahuynh/Desktop/neutrality/masc_redo_txt/"

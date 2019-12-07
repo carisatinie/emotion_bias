@@ -1,5 +1,7 @@
 import csv
 
+# create the csv file with all information for msp
+
 train = 0
 test = 0
 validation = 0

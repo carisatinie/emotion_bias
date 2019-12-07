@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# copy masc data into the masc_redos folder for further processing
+
 redos=()
 input="masc_redos.txt"
 while read line;

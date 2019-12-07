@@ -1,5 +1,8 @@
 import csv
 
+# we needed to rerun a Praat script on the wav files that Parselmouth
+# couldn't process, so we clean out the files we need to rerun here
+
 masc = open("../masc_redo_txt/redos.csv")
 masc_reader = csv.reader(masc, delimiter=',')
 initial = open("../initial_data/all_features_masc.csv")
