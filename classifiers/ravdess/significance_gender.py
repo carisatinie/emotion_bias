@@ -249,6 +249,7 @@ def main(feature_type, writer):
       chi_squared(confusion_1, confusion_2, "male", params[i], params[j])
 
 if __name__ == "__main__":
+  # Run like so: python3 significance_gender.py --feature_type=[corr,a,mfcc,ma,rf]
   parser = argparse.ArgumentParser(description='Run chi-squared with RAVDESS.')
   parser.add_argument('--feature_type')
   parsed_args = parser.parse_args()
